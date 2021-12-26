@@ -36,6 +36,7 @@ public class GameController : MonoBehaviour
     public GameObject deflectorPrefab;
     public GameObject defenderPrefab;
     public GameObject laserPrefab;
+    public GameObject laserBeamPrefab;
 
     public Material whitePrimaryMaterial;
     public Material redPrimaryMaterial;
@@ -46,6 +47,8 @@ public class GameController : MonoBehaviour
     private GameObject[,] pieceGrid;
 
     private Player[,] blockedAreas;
+
+    private List<GameObject> laserBeams = new List<GameObject>();
 
     // Start is called before the first frame update
     void Start()
@@ -65,40 +68,85 @@ public class GameController : MonoBehaviour
         BuildPiecesFromString(gridString);
 
         // pieceGrid[0, 0].GetComponent<LaserController>().EmitLaser();
+        CalculateLaser(Player.White);
         CalculateLaser(Player.Red);
     }
 
+    void CreateLaser(int r1, int c1, int r2, int c2, Direction laserDirection)
+    {
+        Vector3 src = new Vector3(2.0f * r1, 0.7f, 2.0f * c1);
+        Vector3 dst = new Vector3(2.0f * r2, 0.7f, 2.0f * c2);
+        float distance = Mathf.Sqrt(Mathf.Pow(r1 - r2, 2) + Mathf.Pow(c1 - c2, 2));
+
+
+        GameObject laserBeam = Instantiate(laserBeamPrefab, src, Quaternion.identity);
+        laserBeam.transform.localScale = new Vector3(
+            laserBeam.transform.localScale.x, 
+            distance, 
+            laserBeam.transform.localScale.z
+        );
+        if (laserDirection == Direction.North) {
+            laserBeam.transform.Rotate(new Vector3(0, 0, 90));
+        }
+        else if (laserDirection == Direction.East) {
+            laserBeam.transform.Rotate(new Vector3(90, 0, 0));
+        }
+        else if (laserDirection == Direction.South) {
+            laserBeam.transform.Rotate(new Vector3(0, 0, -90));
+        }
+        else if (laserDirection == Direction.West) {
+            laserBeam.transform.Rotate(new Vector3(-90, 0, 0));
+        }
+        laserBeams.Add(laserBeam);
+    }
+
     void CalculateLaser(Player player) {
-        GameObject laserObj = player == Player.Red ? pieceGrid[0, 0] : pieceGrid[7, 9];
+        GameObject laserObj = player == Player.Red ? pieceGrid[0, 0] : pieceGrid[7, 9];   
         LaserController laser = laserObj.GetComponent<LaserController>();
-        (int rowDelta, int columnDelta) = GetDirectionDeltas(laser.direction);
+
+        Direction laserDirection = laser.direction;
+        (int rowDelta, int columnDelta) = GetDirectionDeltas(laserDirection);
 
         int row = Mathf.FloorToInt(laserObj.transform.position.x / 2);
         int col = Mathf.FloorToInt(laserObj.transform.position.z / 2);
+        
+        int srcRow = row, srcCol = col;
 
         int counter = 100;
-        while (counter > 0) {
-
-            counter--;
-
+        while (counter-- > 0) 
+        {
             row += rowDelta;
             col += columnDelta;
 
-            if (row < 0 || row >= rows || col < 0 || col >= columns) {
+            if (row < 0 || row >= rows || col < 0 || col >= columns) 
+            {
+                Debug.Log("The laser has left the board!");
+                CreateLaser(srcRow, srcCol, row + 200 * rowDelta, col + 200 * columnDelta, laserDirection);
                 break;
             }
 
-            if (pieceGrid[row, col] != null) {
-                Direction newDirection = pieceGrid[row, col].GetComponent<PieceController>().GetHitByLaser(rowDelta, columnDelta);
-                Debug.Log("Hit " + pieceGrid[row, col].name + " at " + row + ", " + col);
-                Debug.Log("New direction: " + newDirection);
-                
-                if (newDirection == Direction.None) {
+            if (pieceGrid[row, col] != null) 
+            {
+                Debug.Log("Detected hit at " + row + ", " + col + " while moving " + laserDirection);
+                // Draw a laser between the current laser source and current laser destination
+                CreateLaser(srcRow, srcCol, row, col, laserDirection);
+
+                laserDirection = pieceGrid[row, col].GetComponent<PieceController>().GetHitByLaser(laserDirection);                
+                if (laserDirection == Direction.None) 
+                {
+                    Debug.Log("Laser has stopped!");
                     break;
                 }
-                
-                (rowDelta, columnDelta) = GetDirectionDeltas(newDirection);
-                // break;
+
+                else 
+                {
+                    Debug.Log("New direction: " + laserDirection);
+                    (rowDelta, columnDelta) = GetDirectionDeltas(laserDirection);
+                    
+                    // Update the laser source for the newly reflected laser
+                    srcRow = row;
+                    srcCol = col;
+                }
             }
         }
     }

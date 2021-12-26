@@ -16,6 +16,28 @@ public class SwitchController : PieceController
         topObject.GetComponent<Renderer>().material = accentMaterial;
     }
 
+    override public Direction GetHitByLaser(Direction laserDirection) {
+        Direction laserDirectionRelativeToNorth = RotateRelativeToNorth(laserDirection);
+
+        Debug.Log("Hit a switch!");
+
+        if (laserDirectionRelativeToNorth == Direction.North) {
+            return UnrotateRelativeToNorth(Direction.West);
+        }
+        else if (laserDirectionRelativeToNorth == Direction.East) {
+            return UnrotateRelativeToNorth(Direction.South);
+        }
+        else if (laserDirectionRelativeToNorth == Direction.South) {
+            return UnrotateRelativeToNorth(Direction.East);
+        }
+        else if (laserDirectionRelativeToNorth == Direction.West) {
+            return UnrotateRelativeToNorth(Direction.North);
+        }
+        else {
+            return Direction.None;
+        }
+    }
+
     // Start is called before the first frame update
     void Start()
     {

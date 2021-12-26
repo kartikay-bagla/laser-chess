@@ -40,13 +40,39 @@ public class PieceController : MonoBehaviour
     }
 
     virtual public void ApplyMaterials(Material primaryMaterial, Material accentMaterial) {
-        
+        Debug.Log("ApplyMaterials override karna bhool gaye kya?");
     }
 
-    virtual public Direction GetHitByLaser(int rowDelta, int columnDelta)
+    
+    
+    public Direction RotateRelativeToNorth(Direction direction) 
     {
+        /*
+            To detect laser hits, we can RE-ORIENT the laser's
+            actual direction by imagining this piece to be facing
+            NORTH.
+
+            To do so, we apply the SAME rotation to the LASER's 
+            DIRECTION which, if applied to this piece's direction,
+            would make THIS PIECE face north.
+
+            Applying rotations can be done using arithmetic mod 4.
+        */
+        return (Direction)(((int)direction - (int)this.direction + 4) % 4);
+    }
+
+    public Direction UnrotateRelativeToNorth(Direction direction) 
+    {
+        return (Direction)(((int)direction + (int)this.direction) % 4);
+    }
+
+    virtual public Direction GetHitByLaser(Direction laserDirection)
+    {
+        Debug.Log("GetHitByLaser override karna bhool gaye kya?");
         return Direction.None;
     }
+
+
 
     // Start is called before the first frame update
     void Start()

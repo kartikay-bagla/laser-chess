@@ -18,52 +18,19 @@ public class DeflectorController : PieceController
         capsuleObject.GetComponent<Renderer>().material = primaryMaterial;
     }
 
-    public override Direction GetHitByLaser(int rowDelta, int columnDelta)
+    override public Direction GetHitByLaser(Direction laserDirection)
     {
-        if (direction == Direction.North)
-        {
-            if (rowDelta == 1)
-            {
-                return Direction.East;
-            }
-            else if (columnDelta == -1)
-            {
-                return Direction.North;
-            }
+        Debug.Log("Hit a deflector!");
+
+        Direction laserDirectionRelativeToNorth = RotateRelativeToNorth(laserDirection);
+
+        if (laserDirectionRelativeToNorth == Direction.South) {
+            return UnrotateRelativeToNorth(Direction.East);
         }
-        else if (direction == Direction.South)
-        {
-            if (rowDelta == -1)
-            {
-                return Direction.West;
-            }
-            else if (columnDelta == 1)
-            {
-                return Direction.South;
-            }
+        else if (laserDirectionRelativeToNorth == Direction.West) {
+            return UnrotateRelativeToNorth(Direction.North);
         }
-        else if (direction == Direction.West)
-        {
-            if (rowDelta == 1)
-            {
-                return Direction.West;
-            }
-            else if (columnDelta == 1)
-            {
-                return Direction.North;
-            }
-        }
-        else if (direction == Direction.East)
-        {
-            if (rowDelta == -1)
-            {
-                return Direction.South;
-            }
-            else if (columnDelta == -1)
-            {
-                return Direction.East;
-            }
-        }
+
         return Direction.None;
     }
 

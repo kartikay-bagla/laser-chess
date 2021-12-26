@@ -16,6 +16,12 @@ public class KingController : PieceController
         topObject.GetComponent<Renderer>().material = accentMaterial;
     }
 
+    override public Direction GetHitByLaser(Direction laserDirection) {
+        // TODO: Kill the king
+        Debug.Log("The king was hit!");
+        return Direction.None;
+    }
+
     // Start is called before the first frame update
     void Start()
     {

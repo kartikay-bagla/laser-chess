@@ -18,6 +18,17 @@ public class DefenderController : PieceController
         topObject.GetComponent<Renderer>().material = primaryMaterial;
     }
 
+    override public Direction GetHitByLaser(Direction laserDirection) {
+        Debug.Log("Hit a defender!");
+
+        Direction laserDirectionRelativeToNorth = RotateRelativeToNorth(laserDirection);
+        if (laserDirectionRelativeToNorth != Direction.South) {
+            // TODO: Kill the Defender
+            Debug.Log("Defender was killed!");
+        }
+        return Direction.None;
+    }
+
     // Start is called before the first frame update
     void Start()
     {

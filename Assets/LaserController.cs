@@ -16,6 +16,11 @@ public class LaserController : PieceController
         topObject.GetComponent<Renderer>().material = accentMaterial;
     }
 
+    override public Direction GetHitByLaser(Direction laserDirection) {
+        Debug.Log("Hit a laser!");
+        return Direction.None;
+    }
+
     // Start is called before the first frame update
     void Start()
     {
