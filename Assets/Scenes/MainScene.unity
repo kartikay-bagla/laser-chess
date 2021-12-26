@@ -251,6 +251,8 @@ MonoBehaviour:
   deflectorPrefab: {fileID: 1906825175763845603, guid: 4a86983434edd854c87c0ecbdc07408b, type: 3}
   defenderPrefab: {fileID: 9067439685911385723, guid: bb680348b170dcc4c862da65e68b5336, type: 3}
   laserPrefab: {fileID: 2887905789096919890, guid: 385270d4df2a4364daa9123155c310c9, type: 3}
+  whitePrimaryMaterial: {fileID: 2100000, guid: 810914da18bd674489466077e91ea8cf, type: 2}
+  redPrimaryMaterial: {fileID: 2100000, guid: 1680263b8153411409bba103008fcaa5, type: 2}
 --- !u!4 &867058895
 Transform:
   m_ObjectHideFlags: 0

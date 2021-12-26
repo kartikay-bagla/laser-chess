@@ -2,21 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class KingController : MonoBehaviour
+public class KingController : PieceController
 {
-    private int playerId;
 
-    public void SetupObject(int playerId)
+    override public void ApplyMaterials(Material primaryMaterial, Material accentMaterial)
     {
-        this.playerId = playerId;
-        
         GameObject baseObject = transform.GetChild(0).gameObject;
         GameObject middleObject = transform.GetChild(1).gameObject;
         GameObject topObject = transform.GetChild(2).gameObject;
 
-        Material primaryMaterial = Resources.Load("Materials/Player" + playerId + "Primary") as Material;
-        Material accentMaterial = Resources.Load("Materials/Player" + playerId + "Accent") as Material;
-        
         baseObject.GetComponent<Renderer>().material = accentMaterial;
         middleObject.GetComponent<Renderer>().material = primaryMaterial;
         topObject.GetComponent<Renderer>().material = accentMaterial;

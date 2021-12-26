@@ -2,9 +2,33 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum Player
+{
+    Open,       // O
+    Red,        // R
+    White       // W
+}
+
+public enum Name
+{
+    King,       // K
+    Switch,     // S
+    Deflector,  // T
+    Defender,   // D
+    Laser       // L
+}
+
+public enum Direction
+{
+    North,      // N
+    East,       // E
+    South,      // S
+    West        // W
+}
+
 public class GameController : MonoBehaviour
 {
-    
+
     public GameObject squarePrefab;
     public GameObject kingPrefab;
     public GameObject switchPrefab;
@@ -12,61 +36,137 @@ public class GameController : MonoBehaviour
     public GameObject defenderPrefab;
     public GameObject laserPrefab;
 
-    private int gridSize = 8;
+    public Material whitePrimaryMaterial;
+    public Material redPrimaryMaterial;
+
+    private int rows = 8;
+    private int columns = 10;
     private GameObject[,] grid;
+    private GameObject[,] pieceGrid;
+
+    private Player[,] blockedAreas;
 
     // Start is called before the first frame update
     void Start()
     {
         BuildGrid();
 
-        GameObject p1_king = Instantiate(kingPrefab, new Vector3(0, 0.2f, 0), Quaternion.identity);
-        p1_king.GetComponent<KingController>().SetupObject(1);
+        string gridString = ""
+            + "LRS O O O DRS KRN DRS TRE O O\n"
+            + "O O TRS O O O O O O O\n"
+            + "O O O TWW O O O O O O\n"
+            + "TRN O TWS O SRS SRE O TRE O TWW\n"
+            + "TRE O TWW O SWE SWS O TRN O TWS\n"
+            + "O O O O O O TRE O O O\n"
+            + "O O O O O O O TWN O O\n"
+            + "O O TWW DWN KWN DWN O O O LWN\n";
 
-        GameObject p2_king = Instantiate(kingPrefab, new Vector3(2, 0.2f, 0), Quaternion.identity);
-        p2_king.GetComponent<KingController>().SetupObject(2);
-
-        GameObject p1_switch = Instantiate(switchPrefab, new Vector3(4, 0.2f, 0), Quaternion.identity);
-        p1_switch.GetComponent<SwitchController>().SetupObject(1);
-
-        GameObject p2_switch = Instantiate(switchPrefab, new Vector3(6, 0.2f, 0), Quaternion.identity);
-        p2_switch.GetComponent<SwitchController>().SetupObject(2);
-
-        GameObject p1_deflector = Instantiate(deflectorPrefab, new Vector3(8, 0.2f, 0), Quaternion.identity);
-        p1_deflector.GetComponent<DeflectorController>().SetupObject(1);
-
-        GameObject p2_deflector = Instantiate(deflectorPrefab, new Vector3(10, 0.2f, 0), Quaternion.identity);
-        p2_deflector.GetComponent<DeflectorController>().SetupObject(2);
-
-        GameObject p1_defender = Instantiate(defenderPrefab, new Vector3(12, 0.2f, 0), Quaternion.identity);
-        p1_defender.GetComponent<DefenderController>().SetupObject(1);
-
-        GameObject p2_defender = Instantiate(defenderPrefab, new Vector3(14, 0.2f, 0), Quaternion.identity);
-        p2_defender.GetComponent<DefenderController>().SetupObject(2);
-
-        GameObject p1_laser = Instantiate(laserPrefab, new Vector3(0, 0.2f, 2f), Quaternion.identity);
-        p1_laser.GetComponent<LaserController>().SetupObject(1);
-
-        GameObject p2_laser = Instantiate(laserPrefab, new Vector3(2f, 0.2f, 2f), Quaternion.identity);
-        p2_laser.GetComponent<LaserController>().SetupObject(2);
+        BuildPiecesFromString(gridString);
     }
 
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
     void BuildGrid()
     {
-        grid = new GameObject[gridSize, gridSize];
-        for (int i = 0; i < gridSize; i++)
+        grid = new GameObject[rows, columns];
+        for (int i = 0; i < rows; i++)
         {
-            for (int j = 0; j < gridSize; j++)
+            for (int j = 0; j < columns; j++)
             {
-                grid[i, j] = Instantiate(squarePrefab, new Vector3(2*i, 0, 2*j), Quaternion.identity);
+                grid[i, j] = Instantiate(squarePrefab, new Vector3(2 * i, 0, 2 * j), Quaternion.identity);
                 GameObject child = grid[i, j].transform.GetChild(0).gameObject;
             }
         }
+        BuildBlockedAreas();
     }
+
+    void BuildBlockedAreas()
+    {
+        blockedAreas = new Player[rows, columns];
+        for (int i = 0; i < rows; i++)
+        {
+            for (int j = 0; j < columns; j++)
+            {
+                blockedAreas[i, j] = Player.Open;
+            }
+        }
+
+        // Red
+        int[,] redBlocked = new int[9, 2] {
+            {0, 1},
+            {7, 1},
+            {0, 9},
+            {1, 9},
+            {2, 9},
+            {3, 9},
+            {4, 9},
+            {5, 9},
+            {6, 9}
+        };
+
+        for (int i = 0; i < redBlocked.GetLength(0); i++)
+        {
+            blockedAreas[redBlocked[i, 0], redBlocked[i, 1]] = Player.Red;
+            GameObject gridSquare = grid[redBlocked[i, 0], redBlocked[i, 1]].transform.GetChild(0).gameObject;
+            gridSquare.GetComponent<MeshRenderer>().material = whitePrimaryMaterial;
+        }
+
+        // White
+        int[,] whiteBlocked = new int[9, 2] {
+            {0, 8},
+            {7, 8},
+            {1, 0},
+            {2, 0},
+            {3, 0},
+            {4, 0},
+            {5, 0},
+            {6, 0},
+            {7, 0}
+        };
+
+        for (int i = 0; i < whiteBlocked.GetLength(0); i++)
+        {
+            blockedAreas[whiteBlocked[i, 0], whiteBlocked[i, 1]] = Player.White;
+            GameObject gridSquare = grid[whiteBlocked[i, 0], whiteBlocked[i, 1]].transform.GetChild(0).gameObject;
+            gridSquare.GetComponent<MeshRenderer>().material = redPrimaryMaterial;
+        }
+
+    }
+
+    void BuildPiecesFromString(string gridString)
+    {
+        string[] rowStrings = gridString.Split('\n');
+        pieceGrid = new GameObject[rows, columns];
+        for (int i = 0; i < rows; i++)
+        {
+            string[] columnStrings = rowStrings[i].Split(' ');
+            for (int j = 0; j < columns; j++)
+            {
+                pieceGrid[i, j] = GetPieceFromString(columnStrings[j], i, j);
+            }
+        }
+    }
+
+    GameObject GetPieceFromString(string pieceString, int row, int col)
+    {
+
+        if (pieceString[0] == 'O')
+        {
+            return null;
+        }
+
+        GameObject piece = pieceString[0] == 'K' ? kingPrefab : pieceString[0] == 'S' ? switchPrefab : pieceString[0] == 'T' ? deflectorPrefab : pieceString[0] == 'L' ? laserPrefab : defenderPrefab;
+        Player playerType = pieceString[1] == 'R' ? Player.Red : Player.White;
+        Direction direction = pieceString[2] == 'N' ? Direction.North : pieceString[2] == 'E' ? Direction.East : pieceString[2] == 'S' ? Direction.South : Direction.West;
+
+        GameObject pieceObject = Instantiate(piece, new Vector3(2 * row, 0, 2 * col), Quaternion.identity);
+        pieceObject.GetComponent<PieceController>().SetupObject(playerType, direction);
+
+        return pieceObject;
+    }
+
 }

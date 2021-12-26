@@ -2,22 +2,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class DefenderController : MonoBehaviour
+public class DefenderController : PieceController
 {
-    private int playerId;
 
-    public void SetupObject(int playerId)
+    override public void ApplyMaterials(Material primaryMaterial, Material accentMaterial)
     {
-        this.playerId = playerId;
-        
         GameObject baseObject = transform.GetChild(0).gameObject;
         GameObject middleObject = transform.GetChild(1).gameObject;
         GameObject middle2Object = transform.GetChild(2).gameObject;
         GameObject topObject = transform.GetChild(3).gameObject;
 
-        Material primaryMaterial = Resources.Load("Materials/Player" + playerId + "Primary") as Material;
-        Material accentMaterial = Resources.Load("Materials/Player" + playerId + "Accent") as Material;
-        
         baseObject.GetComponent<Renderer>().material = accentMaterial;
         middleObject.GetComponent<Renderer>().material = accentMaterial;
         middle2Object.GetComponent<Renderer>().material = accentMaterial;
