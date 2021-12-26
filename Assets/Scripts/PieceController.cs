@@ -7,9 +7,13 @@ public class PieceController : MonoBehaviour
 
     private Player playerType;
 
+    public Direction direction;
+
     public void SetupObject(Player playerType, Direction direction)
     {
         this.playerType = playerType;
+        this.direction = direction;
+
         int playerId = (int)playerType;
 
         Material primaryMaterial = Resources.Load("Materials/Player" + playerId + "Primary") as Material;
@@ -37,6 +41,11 @@ public class PieceController : MonoBehaviour
 
     virtual public void ApplyMaterials(Material primaryMaterial, Material accentMaterial) {
         
+    }
+
+    virtual public Direction GetHitByLaser(int rowDelta, int columnDelta)
+    {
+        return Direction.None;
     }
 
     // Start is called before the first frame update

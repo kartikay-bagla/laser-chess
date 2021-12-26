@@ -23,7 +23,8 @@ public enum Direction
     North,      // N
     East,       // E
     South,      // S
-    West        // W
+    West,       // W
+    None        // X
 }
 
 public class GameController : MonoBehaviour
@@ -62,6 +63,58 @@ public class GameController : MonoBehaviour
             + "O O TWW DWN KWN DWN O O O LWN\n";
 
         BuildPiecesFromString(gridString);
+
+        // pieceGrid[0, 0].GetComponent<LaserController>().EmitLaser();
+        CalculateLaser(Player.Red);
+    }
+
+    void CalculateLaser(Player player) {
+        GameObject laserObj = player == Player.Red ? pieceGrid[0, 0] : pieceGrid[7, 9];
+        LaserController laser = laserObj.GetComponent<LaserController>();
+        (int rowDelta, int columnDelta) = GetDirectionDeltas(laser.direction);
+
+        int row = Mathf.FloorToInt(laserObj.transform.position.x / 2);
+        int col = Mathf.FloorToInt(laserObj.transform.position.z / 2);
+
+        int counter = 100;
+        while (counter > 0) {
+
+            counter--;
+
+            row += rowDelta;
+            col += columnDelta;
+
+            if (row < 0 || row >= rows || col < 0 || col >= columns) {
+                break;
+            }
+
+            if (pieceGrid[row, col] != null) {
+                Direction newDirection = pieceGrid[row, col].GetComponent<PieceController>().GetHitByLaser(rowDelta, columnDelta);
+                Debug.Log("Hit " + pieceGrid[row, col].name + " at " + row + ", " + col);
+                Debug.Log("New direction: " + newDirection);
+                
+                if (newDirection == Direction.None) {
+                    break;
+                }
+                
+                (rowDelta, columnDelta) = GetDirectionDeltas(newDirection);
+                // break;
+            }
+        }
+    }
+
+    (int, int) GetDirectionDeltas(Direction dir) {
+        int rowDelta = 0, columnDelta = 0;
+        if (dir == Direction.North) {
+            rowDelta = -1;
+        } else if (dir == Direction.East) {
+            columnDelta = 1;
+        } else if (dir == Direction.South) {
+            rowDelta = 1;
+        } else if (dir == Direction.West) {
+            columnDelta = -1;
+        }
+        return (rowDelta, columnDelta);
     }
 
     // Update is called once per frame
