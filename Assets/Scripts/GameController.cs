@@ -49,6 +49,9 @@ public class GameController : MonoBehaviour
     private Player[,] blockedAreas;
 
     private List<GameObject> laserBeams = new List<GameObject>();
+    private Queue<(float target, GameObject laserBeam)> laserQueue = new Queue<(float target, GameObject laserBeam)>();
+    private static int MAX_LASER_LENGTH = 50;
+    private static float LASER_SPEED = 8.0f;
 
     // Start is called before the first frame update
     void Start()
@@ -82,9 +85,12 @@ public class GameController : MonoBehaviour
         GameObject laserBeam = Instantiate(laserBeamPrefab, src, Quaternion.identity);
         laserBeam.transform.localScale = new Vector3(
             laserBeam.transform.localScale.x, 
-            distance, 
+            0, 
             laserBeam.transform.localScale.z
         );
+        laserQueue.Enqueue((distance, laserBeam));
+
+
         if (laserDirection == Direction.North) {
             laserBeam.transform.Rotate(new Vector3(0, 0, 90));
         }
@@ -121,7 +127,11 @@ public class GameController : MonoBehaviour
             if (row < 0 || row >= rows || col < 0 || col >= columns) 
             {
                 Debug.Log("The laser has left the board!");
-                CreateLaser(srcRow, srcCol, row + 200 * rowDelta, col + 200 * columnDelta, laserDirection);
+                CreateLaser(
+                    srcRow, srcCol, // Start
+                    row + MAX_LASER_LENGTH * rowDelta, col + MAX_LASER_LENGTH * columnDelta, 
+                    laserDirection
+                );
                 break;
             }
 
@@ -168,7 +178,23 @@ public class GameController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (laserQueue.Count == 0) {
+            return;
+        }
 
+        (float target, GameObject laserBeam) = laserQueue.Peek();
+        
+        float length = laserBeam.transform.localScale.y + LASER_SPEED*Time.deltaTime;
+        if (length >= target) {
+            length = target;
+            laserQueue.Dequeue();
+        }
+        
+        laserBeam.transform.localScale = new Vector3(
+            laserBeam.transform.localScale.x, 
+            length, 
+            laserBeam.transform.localScale.z
+        );
     }
 
     void BuildGrid()
